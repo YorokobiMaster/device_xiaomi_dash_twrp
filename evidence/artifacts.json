@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "artifacts": [
+    {
+      "destination": "prebuilt/dash-stock.dtb",
+      "purpose": "preserve the exact stock dash vendor_boot DTB in build middleware",
+      "sha256": "2636d5a861e909f5bf32fb3b5c80b25824fbb6591e31a21b6b1326b6dc52d7e3",
+      "size": 535963,
+      "source": "stock/vendor_boot/aosp_unpack/dtb"
+    },
+    {
+      "destination": "evidence/stock-recovery.fstab",
+      "purpose": "immutable dash stock input used to derive the recovery-specific fstab",
+      "sha256": "dcd57d2fbab10b683ddecea92ae3a54a69ac161af7ef1b90d07190335931b565",
+      "size": 9978,
+      "source": "stock/trees/recovery/system/etc/recovery.fstab"
+    },
+    {
+      "destination": "rootdir/init.recovery.mt6991.rc",
+      "purpose": "stock MT6991 configfs and USB controller selection",
+      "sha256": "ba8eddd72cbaad183012da73c1ebd1d2abbacb0ff1ed4eaad5dd0b4ec395371e",
+      "size": 356,
+      "source": "stock/trees/recovery/init.recovery.mt6991.rc"
+    }
+  ]
+}

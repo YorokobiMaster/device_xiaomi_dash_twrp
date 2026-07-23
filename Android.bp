@@ -1,0 +1,46 @@
+package {
+    default_applicable_licenses: ["Android-Apache-2.0"],
+}
+
+// dash ships an Android 15 vendor with KeyMint V3.  AOSP 16's frozen
+// Gatekeeper V1 client is rebuilt against KeyMint V4, so use the exact client
+// ABI already validated by the TWRP 14 recovery instead.  These modules are
+// link-only: the stock-spine runtime already carries the identical files.
+cc_prebuilt_library_shared {
+    name: "android.hardware.security.keymint-V3-ndk-twrp-a15",
+    srcs: ["prebuilt/a15-aidl/lib64/android.hardware.security.keymint-V3-ndk.so"],
+    strip: { none: true },
+    recovery_available: true,
+    check_elf_files: false,
+    export_include_dirs: ["prebuilt/a15-aidl/include/keymint-v3"],
+}
+
+cc_prebuilt_library_shared {
+    name: "android.hardware.gatekeeper-V1-ndk-twrp-a15",
+    srcs: ["prebuilt/a15-aidl/lib64/android.hardware.gatekeeper-V1-ndk.so"],
+    strip: { none: true },
+    recovery_available: true,
+    check_elf_files: false,
+    export_include_dirs: ["prebuilt/a15-aidl/include/gatekeeper"],
+}
+
+cc_prebuilt_library_shared {
+    name: "lib_android_keymaster_keymint_utils-twrp-a15",
+    srcs: ["prebuilt/a15-aidl/lib64/lib_android_keymaster_keymint_utils.so"],
+    strip: { none: true },
+    recovery_available: true,
+    check_elf_files: false,
+    export_include_dirs: [
+        "prebuilt/a15-aidl/include/keymaster-ng",
+        "prebuilt/a15-aidl/include/keymaster",
+    ],
+}
+
+cc_prebuilt_library_shared {
+    name: "libkeymint_support-twrp-a15",
+    srcs: ["prebuilt/a15-aidl/lib64/libkeymint_support.so"],
+    strip: { none: true },
+    recovery_available: true,
+    check_elf_files: false,
+    export_include_dirs: ["prebuilt/a15-aidl/include/keymint-support"],
+}

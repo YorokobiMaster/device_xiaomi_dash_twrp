@@ -1,0 +1,18 @@
+{
+  "board": "mt6991",
+  "boot_header_version": 4,
+  "cmdline": "bootopt=64S3,32N2,64N2",
+  "dtb_offset": 2278031360,
+  "dtb_size": 535963,
+  "kernel_offset": 2147483648,
+  "page_size": 4096,
+  "ramdisk_offset": 2800746496,
+  "recovery_fragment": {
+    "name": "recovery",
+    "stock_compressed_size": 14767731,
+    "type": 2
+  },
+  "source_report": "out-reports/stock_vendor_boot_parse_a.json",
+  "tags_offset": 2278031360,
+  "vendor_boot_partition_size": 67108864
+}

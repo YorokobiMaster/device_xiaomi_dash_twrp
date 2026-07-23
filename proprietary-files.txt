@@ -1,0 +1,2 @@
+# No proprietary userspace blobs are copied into the first TWRP fragment.
+# The stock DTB is tracked separately as an immutable boot-container artifact.
