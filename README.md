@@ -16,6 +16,13 @@ type `RECOVERY` and name `recovery`. The Android build's complete
   recovery fstab is a TWRP-specific, statically checked derivation.
 - MT6991 USB controller rc: exact stock bytes.
 
+The Android 15 AIDL headers and shared libraries under `prebuilt/a15-aidl/`
+form a link-only platform compatibility set. Every file is content-addressed
+by `evidence/a15-prebuilts.sha256`, and `evidence/verify_tree.py` rejects a
+missing, changed, or unexpected file. The exact Android 15 source revisions
+and build command that generated this set must still be recorded before a
+public source release.
+
 Run `./extract-files.sh` from this directory to re-materialize and hash-check
 the three stock-derived inputs. It does not overwrite the active derived
 `recovery.fstab`. No phone access is used.

@@ -7,6 +7,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 ARTIFACTS = ROOT / "evidence" / "artifacts.json"
+PREBUILT_HASHES = ROOT / "evidence" / "a15-prebuilts.sha256"
 
 
 def sha256(path: Path) -> str:
@@ -40,6 +41,51 @@ def main() -> int:
             f"sha256:{artifact['destination']}",
             actual_hash == artifact["sha256"],
             f"expected={artifact['sha256']} actual={actual_hash}",
+        ))
+
+    expected_prebuilts = {}
+    for line_number, line in enumerate(
+            PREBUILT_HASHES.read_text(encoding="utf-8").splitlines(), start=1):
+        fields = line.split()
+        if len(fields) != 2 or len(fields[0]) != 64:
+            checks.append(result(
+                f"prebuilt-manifest:line:{line_number}",
+                False,
+                f"malformed line: {line}",
+            ))
+            continue
+        digest, relative_path = fields
+        if not relative_path.startswith("prebuilt/a15-aidl/"):
+            checks.append(result(
+                f"prebuilt-manifest:path:{line_number}",
+                False,
+                f"path outside compatibility tree: {relative_path}",
+            ))
+            continue
+        expected_prebuilts[relative_path] = digest
+
+    actual_prebuilts = {
+        path.relative_to(ROOT).as_posix()
+        for path in (ROOT / "prebuilt" / "a15-aidl").rglob("*")
+        if path.is_file()
+    }
+    checks.append(result(
+        "prebuilt-manifest:complete",
+        actual_prebuilts == set(expected_prebuilts),
+        "missing="
+        f"{sorted(set(expected_prebuilts) - actual_prebuilts)} "
+        "unexpected="
+        f"{sorted(actual_prebuilts - set(expected_prebuilts))}",
+    ))
+    for relative_path, expected_hash in sorted(expected_prebuilts.items()):
+        path = ROOT / relative_path
+        if not path.is_file():
+            continue
+        actual_hash = sha256(path)
+        checks.append(result(
+            f"prebuilt-sha256:{relative_path}",
+            actual_hash == expected_hash,
+            f"expected={expected_hash} actual={actual_hash}",
         ))
 
     extract_script = (ROOT / "extract-files.sh").read_text(encoding="utf-8")
