@@ -34,15 +34,25 @@ remain excluded to protect the recovery-fragment size budget. The stock
 platform fragment, including its modules and MTK boot services, is preserved by
 the stock-aware repacker and must not be duplicated in a flashable candidate.
 
+The active fstab maps TWRP's `/cache` volume to Xiaomi's `rescue` partition.
+Manual **Wipe Cache**, or an install workflow that requests an automatic cache
+wipe, destroys MIUI rescue data and must not be presented as a harmless cleanup.
+
 The expected build target on the pinned TWRP 16 root is:
 
 ```sh
 source build/envsetup.sh
 lunch twrp_dash-bp2a-eng
-m recovery -j5
+m recovery -j4
 ```
 
-Use `m vendorbootimage -j5` only to materialize and inspect the complete
+Keep this checkout's default `out/` directory dedicated to the BP2A target.
+When checking another release, set a different `OUT_DIR` before `lunch`; mixing
+release targets in one output directory invalidates the full Soong graph.
+For the audited 6 GiB-RAM cgroup, a full graph regeneration succeeded with
+`SOONG_GOMEMLIMIT=8GiB`, `SOONG_GOGC=20`, and a 10 GiB swap allowance.
+
+Use `m vendorbootimage -j4` only to materialize and inspect the complete
 recovery ramdisk. Its `vendor_boot.img` is build middleware and is not a dash
 flashable image.
 

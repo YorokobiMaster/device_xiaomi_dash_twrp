@@ -20,7 +20,9 @@ mi_ext /mi_ext erofs ro wait,slotselect,logical
 mi_ext /mi_ext ext4 ro wait,slotselect,logical
 
 /dev/block/by-name/metadata /metadata f2fs noatime,nosuid,nodev,discard wait,check
+# Keep noatime: fscrypt_is_data_mounted_noatime() is the read-only decrypt guard.
 /dev/block/by-name/userdata /data f2fs noatime,nosuid,nodev,discard,noflush_merge,fsync_mode=nobarrier,reserve_root=134217,resgid=1065,gc_merge,atgc,age_extent_cache,inlinecrypt wait,check,quota,latemount,resize,reservedsize=128m,checkpoint=fs,fileencryption=aes-256-xts:aes-256-cts:v2+inlinecrypt_optimized,keydirectory=/metadata/vold/metadata_encryption,fsverity,storage,settingsstorage,userdataencryptbackup
+# Xiaomi maps /cache to the rescue partition; wiping Cache destroys rescue data.
 /dev/block/by-name/rescue /cache ext4 noatime,nosuid,nodev,noauto_da_alloc,discard wait,check,formattable
 
 # Only the host controller paired with dash's proven 16701000.usb0 path is kept.

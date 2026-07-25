@@ -14,7 +14,9 @@ TARGET_BOARD_PLATFORM := mt6991
 TARGET_NO_BOOTLOADER := true
 TARGET_NO_KERNEL := true
 
-# The pinned TWRP manifest intentionally removes non-recovery test/tool trees.
+# The pinned recovery manifest intentionally omits test and host-tool dependency
+# closures. Soong still parses their remaining Android.bp files; selected
+# recovery modules must satisfy their dependencies when Ninja executes.
 ALLOW_MISSING_DEPENDENCIES := true
 
 # Stock dash vendor_boot v4 facts. The build output is content-only middleware.
@@ -47,9 +49,7 @@ BOARD_HAS_LARGE_FILESYSTEM := true
 BOARD_HAS_NO_SELECT_BUTTON := true
 BOARD_SUPPRESS_SECURE_ERASE := true
 
-# ADB and fastbootd remain available. Keep a reproducible bootstrap mode that
-# proves the Android 16 UI on the verified stock/A15 runtime before bringing the
-# FBE stack forward. Normal builds continue to include crypto.
+# ADB, fastbootd, and the read-only FBE path are always part of release builds.
 TW_THEME := portrait_hdpi
 TW_BRIGHTNESS_PATH := "/sys/class/leds/lcd-backlight/brightness"
 TW_MAX_BRIGHTNESS := 16383
@@ -58,11 +58,7 @@ TW_USE_NEW_MINADBD := true
 TW_EXCLUDE_DEFAULT_USB_INIT := true
 TW_INCLUDE_FASTBOOTD := true
 TW_EXCLUDE_APEX := true
-ifeq ($(DASH_TWRP16_BOOTSTRAP_NO_CRYPTO),true)
-TW_INCLUDE_CRYPTO := false
-else
 TW_INCLUDE_CRYPTO := true
-endif
 TW_EXCLUDE_TZDATA := true
 TW_EXCLUDE_NANO := true
 TW_EXCLUDE_BASH := true
@@ -82,7 +78,7 @@ TW_KEEP_ODM_MOUNTED := true
 # TWRP maps metadata-encrypted userdata before user authentication. Tear that
 # mapping down through TWRP's native dmctl path before formatting the raw block.
 TW_USE_DMCTL := true
-# Preserve the single read-only user-0 credential attempt for explicit UI use.
+# Keep user-0 credential entry explicit; hardware throttling governs retries.
 TW_SKIP_FBE_DEFAULT_PASSWORD := true
 
 # RGB565 is the format proven by the v7-v9 runtime tests. Touch and the stock

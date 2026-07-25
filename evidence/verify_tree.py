@@ -107,9 +107,14 @@ def main() -> int:
         "BOARD_VENDOR_BOOTIMAGE_PARTITION_SIZE := 67108864",
         "BOARD_RAMDISK_USE_LZ4 := true",
         "TW_INCLUDE_CRYPTO := true",
+        "ALLOW_MISSING_DEPENDENCIES := true",
     ]
     for token in required:
-        checks.append(result(f"board-required:{token}", token in board, token))
+        checks.append(result(
+            f"board-required:{token}",
+            any(line.strip() == token for line in board.splitlines()),
+            token,
+        ))
 
     forbidden = [
         "BOARD_RECOVERYIMAGE_PARTITION_SIZE :=",
@@ -117,6 +122,7 @@ def main() -> int:
         "BOARD_SUPER_PARTITION_SIZE :=",
         "TW_EXCLUDE_MTP := true",
         "TW_EXTRA_LANGUAGES := true",
+        "DASH_TWRP16_BOOTSTRAP_NO_CRYPTO",
     ]
     for token in forbidden:
         checks.append(result(f"board-forbidden:{token}", token not in board, token))
@@ -222,6 +228,48 @@ def main() -> int:
     usb_rc = (ROOT / "rootdir" / "init.recovery.mt6991.rc").read_text(encoding="utf-8")
     checks.append(result("usb:configfs", "setprop sys.usb.configfs 1" in usb_rc, "stock configfs property"))
     checks.append(result("usb:controller", "16701000.usb0" in usb_rc, "stock MT6991 controller"))
+
+    project_rc = (ROOT / "rootdir" / "init.recovery.project.rc").read_text(encoding="utf-8")
+    project_required = [
+        "setprop sys.usb.config adb",
+        "service dash-touch-bridge /system/bin/touch_report_debug",
+        "setenv LD_LIBRARY_PATH /odm/lib64:/system/lib64",
+        "insmod /lib/modules/xiaomi_touch_dash.ko",
+        "insmod /lib/modules/nt38771_touch_dash.ko",
+        "start dash-touch-bridge",
+    ]
+    checks.append(result(
+        "project-init:imported",
+        "import /init.recovery.project.rc" in usb_rc,
+        "stock MT6991 init imports the project hook",
+    ))
+    for token in project_required:
+        checks.append(result(
+            f"project-init:required:{token}",
+            token in project_rc,
+            token,
+        ))
+    common_touch = project_rc.find("insmod /lib/modules/xiaomi_touch_dash.ko")
+    panel_touch = project_rc.find("insmod /lib/modules/nt38771_touch_dash.ko")
+    checks.append(result(
+        "project-init:touch-module-order",
+        common_touch >= 0 and panel_touch > common_touch,
+        "xiaomi_touch_dash.ko must load before nt38771_touch_dash.ko",
+    ))
+
+    android_mk = (ROOT / "Android.mk").read_text(encoding="utf-8")
+    device_mk = (ROOT / "device.mk").read_text(encoding="utf-8")
+    checks.append(result(
+        "project-init:built",
+        "LOCAL_MODULE := init.recovery.project.rc" in android_mk
+        and "LOCAL_SRC_FILES := rootdir/init.recovery.project.rc" in android_mk,
+        "project hook has a root prebuilt module",
+    ))
+    checks.append(result(
+        "project-init:packaged",
+        "init.recovery.project.rc" in device_mk,
+        "project hook is selected by the product",
+    ))
 
     passed = all(check["passed"] for check in checks)
     output = {
