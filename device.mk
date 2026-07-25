@@ -17,6 +17,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
 
 PRODUCT_PACKAGES += \
     init.recovery.mt6991.rc \
+    init.recovery.project.rc \
     task_profiles.json
 
 # Remove optional utilities inherited by TWRP common.mk for the size-gated first build.

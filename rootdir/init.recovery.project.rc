@@ -1,0 +1,21 @@
+# Start stock recovery adbd independently of the TWRP UI process.
+on post-fs
+    setprop sys.usb.config adb
+
+# Run Xiaomi's stock host-touch report loop without the Android Binder HAL.
+service dash-touch-bridge /system/bin/touch_report_debug
+    class core
+    user root
+    group root input
+    seclabel u:r:recovery:s0
+    disabled
+    oneshot
+    setenv LD_LIBRARY_PATH /odm/lib64:/system/lib64
+
+# Load the device-exact vendor_dlkm touchscreen pair after platform modules.
+on init
+    insmod /lib/modules/xiaomi_touch_dash.ko
+    insmod /lib/modules/nt38771_touch_dash.ko
+    chown root input /dev/xiaomi-touch
+    chmod 0660 /dev/xiaomi-touch
+    start dash-touch-bridge
