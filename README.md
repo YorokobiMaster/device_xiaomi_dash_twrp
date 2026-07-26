@@ -63,33 +63,29 @@ wait,check,formattable,wipeduringfactoryreset=0,display="Cache (Rescue)"
 
 `m recovery` 主要更新 recovery 二进制及其直接构建产物；它不会保证 `out/target/product/dash/recovery/root/` 中的 recovery ramdisk staging 已刷新。本设备设置了 `BOARD_MOVE_RECOVERY_RESOURCES_TO_VENDOR_BOOT := true`，所以生成最终 recovery fragment 前必须额外构建 `vendorbootimage`。
 
-下面的命令假定 Android 源码树为 `source-twrp16/`，配套的 `repack/` 工具目录位于工作区根目录。设备树仓库本身不包含 `patches/apply.sh` 和 `repack/`。
+下面的命令假定 Android 源码树为 `source-twrp16/`，步骤均在该目录内执行。本仓库根目录的 `local_manifest.xml` 会让 repo 额外拉入本设备树、修改过的三个平台仓库（`bootable/recovery`、`system/core`、`system/vold`）以及 `repack/` 工具。
 
 ```sh
-# 1. 同步固定的 TWRP 16 源码树
+# 1. 同步固定的 TWRP 16 源码树（含本设备树、平台修改和 repack 工具）
 cd /path/to/source-twrp16
-repo init -u <manifest> -b twrp-16.0
+repo init -u https://github.com/TWRP-Test/platform_manifest_twrp_aosp -b twrp-16.0
+mkdir -p .repo/local_manifests
+curl -L -o .repo/local_manifests/dash.xml \
+    https://raw.githubusercontent.com/YorokobiMaster/device_xiaomi_dash_twrp/twrp-16.0/local_manifest.xml
 repo sync
 
-# 2. 放入本设备树
-git clone <this-repo> device/xiaomi/dash
-
-# 3. 确认本项目对应的 bootable/recovery、system/vold、system/core
-#    平台修改已经应用。设备树仓库不提供自动 apply.sh。
-
-# 4. 编译 recovery，并刷新 recovery ramdisk/vendor_boot staging
+# 2. 编译 recovery，并刷新 recovery ramdisk/vendor_boot staging
 source build/envsetup.sh
 lunch twrp_dash-bp2a-eng
 SOONG_GOMEMLIMIT=8GiB SOONG_GOGC=20 m recovery vendorbootimage -j4
 
-# 5. 在重打包前确认最新 fstab 已进入 staging
+# 3. 在重打包前确认最新 fstab 已进入 staging
 cmp device/xiaomi/dash/recovery.fstab \
     out/target/product/dash/recovery/root/system/etc/recovery.fstab
 
-# 6. 准备经过审计的精简 runtime tree
+# 4. 准备经过审计的精简 runtime tree
 #    不要直接把 stock vendor_boot 提取出的 recovery.cpio 当 replacement：
 #    原厂 type-2 小片段通常不含 system/bin/recovery。
-cd /path/to/workspace
 VALIDATED_RUNTIME_TREE=/path/to/validated-runtime-tree
 RUNTIME_TREE=/tmp/dash-runtime-tree
 REPLACEMENT_CPIO=/tmp/dash-recovery.cpio
@@ -100,36 +96,38 @@ cp -a --reflink=auto "$VALIDATED_RUNTIME_TREE" "$RUNTIME_TREE"
 # 其它 stock-derived payload。不要用 rsync 把整个 staging tree 覆盖进来：
 # 构建树中的共享库可能来自不同的 API 世代，单独替换 translate/compat
 # 库会把新的未随包提供的 NDK 依赖带进 recovery，导致 linker 在启动时退出。
-cp source-twrp16/out/target/product/dash/recovery/root/system/bin/recovery \
+cp out/target/product/dash/recovery/root/system/bin/recovery \
     "$RUNTIME_TREE/system/bin/recovery"
-cp source-twrp16/out/target/product/dash/recovery/root/system/etc/recovery.fstab \
+cp out/target/product/dash/recovery/root/system/etc/recovery.fstab \
     "$RUNTIME_TREE/system/etc/recovery.fstab"
-cp source-twrp16/out/target/product/dash/recovery/root/twres/languages/en.xml \
+cp out/target/product/dash/recovery/root/twres/languages/en.xml \
     "$RUNTIME_TREE/twres/languages/en.xml"
 # portrait.xml 等其它主题文件只有在逐文件对比源码与 validated tree、并确认
 # 未回退 /data/media/0 等设备专属约束后，才能单独加入白名单。
-source-twrp16/out/host/linux-x86/bin/mkbootfs \
-    -d source-twrp16/out/target/product/dash \
+out/host/linux-x86/bin/mkbootfs \
+    -d out/target/product/dash \
     "$RUNTIME_TREE" > "$REPLACEMENT_CPIO"
-source-twrp16/out/host/linux-x86/bin/lz4 \
+out/host/linux-x86/bin/lz4 \
     -l -12 --favor-decSpeed "$REPLACEMENT_CPIO" "$REPLACEMENT_LZ4"
 
-# 7. 如果需要 root adbd，才执行下面三行；否则保留上面的 FINAL_FRAGMENT
+# 5. 如果需要 root adbd，才执行下面三行；否则保留上面的 FINAL_FRAGMENT
 ROOT_ADBD_LZ4=/tmp/dash-root-adbd.cpio.lz4
-python3 source-twrp16/device/xiaomi/dash/tools/patch_recovery_adbd_props.py \
+python3 device/xiaomi/dash/tools/patch_recovery_adbd_props.py \
     --input-fragment "$REPLACEMENT_LZ4" \
     --output-fragment "$ROOT_ADBD_LZ4" \
     --report /tmp/root-adbd-patch-report.json
 FINAL_FRAGMENT="$ROOT_ADBD_LZ4"
 
-# 8. 验证最终 replacement fragment 同时含有新 recovery、fstab 和 root adbd 属性
+# 6. 验证最终 replacement fragment 同时含有新 recovery、fstab 和 root adbd 属性
 lz4 -dc "$FINAL_FRAGMENT" | cpio -t | grep -Fx 'system/bin/recovery'
 lz4 -dc "$FINAL_FRAGMENT" | \
     cpio -i --to-stdout system/etc/recovery.fstab | \
     grep -F 'wipeduringfactoryreset=0' \
     | grep -F 'display="Cache (Rescue)"'
 
-# 9. 以原厂 vendor_boot 和 vbmeta 为模板重打包
+# 7. 以原厂 vendor_boot 和 vbmeta 为模板重打包
+#    repack/inputs/ 不在公开仓库中分发；请自行从官方固件提取 stock
+#    vendor_boot/vbmeta 并放到对应路径
 FINAL_IMAGE=/tmp/dash-UNTESTED-vendor_boot.img
 repack/stock_aware_repack_tool \
     --template repack/inputs/dash-a15/stock-vendor_boot.img \
