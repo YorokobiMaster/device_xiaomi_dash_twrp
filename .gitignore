@@ -1,0 +1,24 @@
+# ---- Stock firmware inputs (never commit: Xiaomi copyrighted binaries) ----
+repack/inputs/
+*.img
+*.img.bak
+
+# ---- Repack pipeline artifacts ----
+*.cpio
+*.cpio.lz4
+*.lz4
+repack-report.json
+budget.json
+
+# ---- Build outputs ----
+out/
+
+# ---- Patch application leftovers ----
+*.orig
+*.rej
+*~
+
+# ---- Tooling junk ----
+__pycache__/
+*.pyc
+.DS_Store
