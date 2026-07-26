@@ -57,6 +57,9 @@ TW_DEFAULT_BRIGHTNESS := 8192
 TW_USE_NEW_MINADBD := true
 TW_EXCLUDE_DEFAULT_USB_INIT := true
 TW_INCLUDE_FASTBOOTD := true
+# fastbootd cannot run on dash's USB setup; only bootloader fastboot works.
+# Hide the Fastboot reboot entry (the binary stays for the settings toggle).
+TW_NO_REBOOT_FASTBOOT := true
 TW_EXCLUDE_APEX := true
 TW_INCLUDE_CRYPTO := true
 TW_EXCLUDE_TZDATA := true
@@ -70,6 +73,8 @@ TW_NO_EXFAT_FUSE := true
 TW_NO_NETWORK := true
 TW_NO_LEGACY_PROPS := true
 TW_NO_BIND_SYSTEM := true
+# Keep legacy Advanced actions reversible while hiding them from the dash UI.
+TW_SHOW_LEGACY_ADVANCED := false
 # The stock A15 TEE/KeyMint/Gatekeeper executables run directly from vendor.
 # Keep its read-only mount alive after parsing the additional vendor fstab.
 TW_KEEP_VENDOR_MOUNTED := true

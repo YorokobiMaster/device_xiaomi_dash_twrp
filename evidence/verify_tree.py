@@ -108,6 +108,7 @@ def main() -> int:
         "BOARD_VENDOR_BOOTIMAGE_PARTITION_SIZE := 67108864",
         "BOARD_RAMDISK_USE_LZ4 := true",
         "TW_INCLUDE_CRYPTO := true",
+        "TW_NO_REBOOT_FASTBOOT := true",
         "ALLOW_MISSING_DEPENDENCIES := true",
     ]
     for token in required:
