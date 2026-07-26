@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import hashlib
 import json
+import shlex
 import sys
 from pathlib import Path
 
@@ -128,7 +129,11 @@ def main() -> int:
         checks.append(result(f"board-forbidden:{token}", token not in board, token))
 
     fstab = (ROOT / "recovery.fstab").read_text(encoding="utf-8")
-    rows = [line.split() for line in fstab.splitlines() if line.strip() and not line.lstrip().startswith("#")]
+    rows = [
+        shlex.split(line, comments=False, posix=True)
+        for line in fstab.splitlines()
+        if line.strip() and not line.lstrip().startswith("#")
+    ]
     logical = {
         "system", "system_ext", "vendor", "product", "odm", "vendor_dlkm",
         "odm_dlkm", "system_dlkm", "mi_ext",
@@ -168,12 +173,20 @@ def main() -> int:
     ))
 
     cache = [row for row in rows if len(row) > 1 and row[1] == "/cache"]
+    cache_flags = cache[0][4].split(",") if len(cache) == 1 and len(cache[0]) == 5 else []
+    required_cache_flags = {
+        "wait",
+        "check",
+        "formattable",
+        "wipeduringfactoryreset=0",
+        "display=Cache (Rescue)",
+    }
     checks.append(result(
         "fstab:cache-rescue",
         len(cache) == 1
         and cache[0][0] == "/dev/block/by-name/rescue"
         and cache[0][2] == "ext4"
-        and cache[0][4] == "wait,check,formattable",
+        and required_cache_flags.issubset(cache_flags),
         f"rows={cache}",
     ))
 
