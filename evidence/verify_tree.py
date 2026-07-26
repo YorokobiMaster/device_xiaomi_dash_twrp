@@ -109,6 +109,8 @@ def main() -> int:
         "BOARD_RAMDISK_USE_LZ4 := true",
         "TW_INCLUDE_CRYPTO := true",
         "TW_NO_REBOOT_FASTBOOT := true",
+        "RECOVERY_SDCARD_ON_DATA := true",
+        'TW_INTERNAL_STORAGE_MOUNT_POINT := "/data/media/0"',
         "ALLOW_MISSING_DEPENDENCIES := true",
     ]
     for token in required:
@@ -242,8 +244,26 @@ def main() -> int:
     usb_rc = (ROOT / "rootdir" / "init.recovery.mt6991.rc").read_text(encoding="utf-8")
     checks.append(result("usb:configfs", "setprop sys.usb.configfs 1" in usb_rc, "stock configfs property"))
     checks.append(result("usb:controller", "16701000.usb0" in usb_rc, "stock MT6991 controller"))
-
     project_rc = (ROOT / "rootdir" / "init.recovery.project.rc").read_text(encoding="utf-8")
+    checks.append(result(
+        "storage:direct-path",
+        "export EXTERNAL_STORAGE /data/media/0" in project_rc
+        and "rmdir /sdcard" in project_rc,
+        "dash removes the generic /sdcard directory and exports direct storage",
+    ))
+
+    source_root = ROOT.parents[2]
+    for theme_name in ("portrait.xml", "landscape.xml", "watch.xml"):
+        theme = source_root / "bootable" / "recovery" / "gui" / "theme" / "common" / theme_name
+        theme_text = theme.read_text(encoding="utf-8")
+        checks.append(result(
+            f"theme:{theme_name}:direct-storage-defaults",
+            'default="/sdcard"' not in theme_text
+            and "tw_zip_location=/sdcard" not in theme_text
+            and "tw_filecheck=/sdcard" not in theme_text,
+            "theme file selectors must start at /data/media/0",
+        ))
+
     project_required = [
         "setprop sys.usb.config adb",
         "service dash-touch-bridge /system/bin/touch_report_debug",

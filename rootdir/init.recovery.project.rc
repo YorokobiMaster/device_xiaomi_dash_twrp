@@ -1,5 +1,10 @@
 # Start stock recovery adbd independently of the TWRP UI process.
 on post-fs
+    # The generic recovery init creates an empty /sdcard mount point on init.
+    # Dash uses /data/media/0 directly, so remove that compatibility directory
+    # after init has run and publish the real storage path to recovery services.
+    export EXTERNAL_STORAGE /data/media/0
+    rmdir /sdcard
     setprop sys.usb.config adb
 
 # Run Xiaomi's stock host-touch report loop without the Android Binder HAL.
