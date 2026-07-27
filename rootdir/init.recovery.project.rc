@@ -14,13 +14,22 @@ service dash-touch-bridge /system/bin/touch_report_debug
     group root input
     seclabel u:r:recovery:s0
     disabled
-    oneshot
+    # This is a long-running daemon. If it exits during early touch setup,
+    # let init retry it (default 5s period) instead of leaving the screen
+    # permanently inert.
     setenv LD_LIBRARY_PATH /odm/lib64:/system/lib64
 
 # Load the device-exact vendor_dlkm touchscreen pair after platform modules.
 on init
     insmod /lib/modules/xiaomi_touch_dash.ko
     insmod /lib/modules/nt38771_touch_dash.ko
+
+# Module probing and ueventd publish the character node asynchronously, so
+# wait for the node before starting the host-touch loop. A wait timeout only
+# fails this one command: the start still runs and init's service retry above
+# keeps recovering until the node appears.
+on boot
+    wait /dev/xiaomi-touch 10
     chown root input /dev/xiaomi-touch
     chmod 0660 /dev/xiaomi-touch
     start dash-touch-bridge

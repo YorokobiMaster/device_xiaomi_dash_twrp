@@ -270,6 +270,7 @@ def main() -> int:
         "setenv LD_LIBRARY_PATH /odm/lib64:/system/lib64",
         "insmod /lib/modules/xiaomi_touch_dash.ko",
         "insmod /lib/modules/nt38771_touch_dash.ko",
+        "wait /dev/xiaomi-touch 10",
         "start dash-touch-bridge",
     ]
     checks.append(result(
@@ -283,6 +284,12 @@ def main() -> int:
             token in project_rc,
             token,
         ))
+    checks.append(result(
+        "project-init:bridge-is-retryable",
+        "    oneshot\n" not in project_rc
+        and "on boot\n    wait /dev/xiaomi-touch 10" in project_rc,
+        "bridge must wait for its device node and remain restartable",
+    ))
     common_touch = project_rc.find("insmod /lib/modules/xiaomi_touch_dash.ko")
     panel_touch = project_rc.find("insmod /lib/modules/nt38771_touch_dash.ko")
     checks.append(result(
