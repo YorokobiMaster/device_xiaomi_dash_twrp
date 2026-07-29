@@ -85,6 +85,9 @@ TW_SHOW_LEGACY_ADVANCED := false
 TW_KEEP_VENDOR_MOUNTED := true
 # The stock Weaver binary links its Xiaomi AuthSecret AIDL interface from ODM.
 TW_KEEP_ODM_MOUNTED := true
+# Once both TWRP data-decryption states are authoritative, release the stock
+# credential services and their read-only vendor/odm mounts.
+TW_DASH_RELEASE_CRYPTO_MOUNTS_AFTER_DECRYPT := true
 # TWRP maps metadata-encrypted userdata before user authentication. Tear that
 # mapping down through TWRP's native dmctl path before formatting the raw block.
 TW_USE_DMCTL := true
