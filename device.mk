@@ -16,6 +16,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
     ro.twrp.vendor_boot=true
 
 PRODUCT_PACKAGES += \
+    dash.recovery.logd.rc \
     init.recovery.mt6991.rc \
     init.recovery.project.rc \
     task_profiles.json
