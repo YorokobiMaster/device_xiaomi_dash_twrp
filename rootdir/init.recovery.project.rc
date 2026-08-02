@@ -19,10 +19,12 @@ service dash-touch-bridge /system/bin/touch_report_debug
     # permanently inert.
     setenv LD_LIBRARY_PATH /odm/lib64:/system/lib64
 
-# Load the device-exact vendor_dlkm touchscreen pair after platform modules.
+# Load the device-exact vendor_dlkm touchscreen and haptics modules after
+# platform modules.
 on init
     insmod /lib/modules/xiaomi_touch_dash.ko
     insmod /lib/modules/nt38771_touch_dash.ko
+    insmod /lib/modules/fs3002_haptic.ko
 
 # Module probing and ueventd publish the character node asynchronously, so
 # wait for the node before starting the host-touch loop. A wait timeout only
