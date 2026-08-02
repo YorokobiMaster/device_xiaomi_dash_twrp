@@ -14,25 +14,29 @@
  * limitations under the License.
  */
 
-#pragma once
+#include <keymint_support/key_param_output.h>
 
-namespace keymaster {
+#include <iomanip>
 
-/**
- * Version enumerates the list of Keymaster/KeyMint versions that we may support.  As old
- * versions are deprecated and removed they should be removed from this enum, which will make it
- * possible to easily find the version-dependent code and remove dead branches.
- */
-enum class KmVersion : int {
-    KEYMASTER_1 = 10,
-    KEYMASTER_1_1 = 11,
-    KEYMASTER_2 = 20,
-    KEYMASTER_3 = 30,
-    KEYMASTER_4 = 40,
-    KEYMASTER_4_1 = 41,
-    KEYMINT_1 = 100,
-    KEYMINT_2 = 200,
-    KEYMINT_3 = 300,
-};
+#include <keymint_support/keymint_tags.h>
 
-};  // namespace keymaster
+namespace aidl::android::hardware::security::keymint {
+
+using ::std::endl;
+using ::std::ostream;
+
+ostream& operator<<(ostream& os, const ::std::vector<KeyParameter>& set) {
+    if (set.size() == 0) {
+        os << "(Empty)" << endl;
+    } else {
+        os << "\n";
+        for (const auto& elem : set) os << elem << endl;
+    }
+    return os;
+}
+
+ostream& operator<<(ostream& os, const KeyParameter& param) {
+    return os << param.toString();
+}
+
+}  // namespace aidl::android::hardware::security::keymint

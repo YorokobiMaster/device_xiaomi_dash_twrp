@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "purpose": "Rebuild the dash Android 15 KeyMint V3 compatibility libraries without Xiaomi stock recovery ELFs",
+  "source_baseline": {
+    "tag": "android-15.0.0_r1",
+    "projects": {
+      "platform/hardware/interfaces": "488942f82bd1bc9ad1cb65a02c71421dc3a6a3d6",
+      "platform/system/keymaster": "8fecfe9ee2e46c3b7017be66cbdb4f080266e1c4"
+    }
+  },
+  "frozen_aidl": {
+    "android.hardware.gatekeeper-V1": {
+      "hash": "d877e8a1608a00fd9068bcd7e69ea480a7ea17f0",
+      "tree_sha256": "9ab4dedf5dce12a5d797cfcc69aac637d8721b43f1fa42092f60d1318f066059"
+    },
+    "android.hardware.security.keymint-V3": {
+      "hash": "74a538630d5d90f732f361a2313cbb69b09eb047",
+      "tree_sha256": "29ae5f8e7157b1261e10cf8fed315d94266d40687f32147574df423802569d87"
+    },
+    "android.hardware.security.secureclock-V1": {
+      "tree_sha256": "1e4aed3652caa6434124f014c1a673413437017a297dafe0ca314ee23944f2bd"
+    }
+  },
+  "build_toolchain": {
+    "platform/hardware/interfaces": "185265a4c2dccc7f6770ea08eddd36a15b2035b6",
+    "platform/system/tools/aidl": "5bde6fcffe8e3ac6feca449f7bc3502eed5fc0f5",
+    "platform/build/soong": "caeeba2d1675ecd6bc1d0d737632b453fb7d93cf",
+    "platform/build": "6dc792b3b14f35cc05d51468758fc0c14bc0d425",
+    "platform/prebuilts/clang/host/linux-x86": "2d4dcbff7cb42f360f368bacf51cfe711fd1cb0f",
+    "platform/frameworks/native": "2827a4a16b0340ecd07c2d5a6c89991799b362bb"
+  },
+  "contract": {
+    "gatekeeper_version": 1,
+    "keymint_version": 3,
+    "secureclock_version": 1,
+    "gatekeeper_must_link_keymint": "android.hardware.security.keymint-V3-ndk-twrp-a15.so",
+    "keymint_must_link_secureclock": "android.hardware.security.secureclock-V1-ndk-twrp-a15-build.so",
+    "forbidden_dependency": "android.hardware.security.keymint-V4-ndk.so"
+  }
+}

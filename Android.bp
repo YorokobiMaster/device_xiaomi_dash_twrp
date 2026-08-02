@@ -2,45 +2,113 @@ package {
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
-// dash ships an Android 15 vendor with KeyMint V3.  AOSP 16's frozen
-// Gatekeeper V1 client is rebuilt against KeyMint V4, so use the exact client
-// ABI already validated by the TWRP 14 recovery instead.  These modules are
-// link-only: the stock-spine runtime already carries the identical files.
-cc_prebuilt_library_shared {
+// dash ships an Android 15 vendor with KeyMint V3. AOSP 16's normal
+// Gatekeeper V1 target follows the latest KeyMint V4 interface, so generate the
+// frozen AIDL sources with the pinned platform toolchain and link them narrowly
+// against V3. SOURCE_LOCK.json records both the frozen A15 source revision and
+// the A16 generator revision. No Xiaomi recovery ELF is used by these modules.
+cc_library_static {
+    name: "libbinder_ndk_api35_transaction_names_compat",
+    srcs: ["prebuilt/a15-aidl/src/binder_ndk_api35_transaction_names_compat.cpp"],
+    shared_libs: ["libbinder_ndk"],
+    recovery_available: true,
+}
+
+cc_library_shared {
+    name: "android.hardware.security.secureclock-V1-ndk-twrp-a15-build",
+    generated_sources: ["android.hardware.security.secureclock-V1-ndk-source"],
+    generated_headers: ["android.hardware.security.secureclock-V1-ndk-source"],
+    export_generated_headers: ["android.hardware.security.secureclock-V1-ndk-source"],
+    shared_libs: ["libbinder_ndk"],
+    export_shared_lib_headers: ["libbinder_ndk"],
+    static_libs: ["libbinder_ndk_api35_transaction_names_compat"],
+    recovery_available: true,
+}
+
+cc_library_shared {
     name: "android.hardware.security.keymint-V3-ndk-twrp-a15",
-    srcs: ["prebuilt/a15-aidl/lib64/android.hardware.security.keymint-V3-ndk.so"],
-    strip: { none: true },
+    generated_sources: ["android.hardware.security.keymint-V3-ndk-source"],
+    generated_headers: ["android.hardware.security.keymint-V3-ndk-source"],
+    export_generated_headers: ["android.hardware.security.keymint-V3-ndk-source"],
+    shared_libs: [
+        "android.hardware.security.secureclock-V1-ndk-twrp-a15-build",
+        "libbinder_ndk",
+    ],
+    export_shared_lib_headers: [
+        "android.hardware.security.secureclock-V1-ndk-twrp-a15-build",
+        "libbinder_ndk",
+    ],
+    static_libs: ["libbinder_ndk_api35_transaction_names_compat"],
     recovery_available: true,
-    check_elf_files: false,
-    export_include_dirs: ["prebuilt/a15-aidl/include/keymint-v3"],
 }
 
-cc_prebuilt_library_shared {
+cc_library_shared {
     name: "android.hardware.gatekeeper-V1-ndk-twrp-a15",
-    srcs: ["prebuilt/a15-aidl/lib64/android.hardware.gatekeeper-V1-ndk.so"],
-    strip: { none: true },
+    generated_sources: ["android.hardware.gatekeeper-V1-ndk-source"],
+    generated_headers: ["android.hardware.gatekeeper-V1-ndk-source"],
+    export_generated_headers: ["android.hardware.gatekeeper-V1-ndk-source"],
+    shared_libs: [
+        "android.hardware.security.keymint-V3-ndk-twrp-a15",
+        "libbinder_ndk",
+    ],
+    export_shared_lib_headers: [
+        "android.hardware.security.keymint-V3-ndk-twrp-a15",
+        "libbinder_ndk",
+    ],
+    static_libs: ["libbinder_ndk_api35_transaction_names_compat"],
     recovery_available: true,
-    check_elf_files: false,
-    export_include_dirs: ["prebuilt/a15-aidl/include/gatekeeper"],
 }
 
-cc_prebuilt_library_shared {
+cc_library_shared {
     name: "lib_android_keymaster_keymint_utils-twrp-a15",
-    srcs: ["prebuilt/a15-aidl/lib64/lib_android_keymaster_keymint_utils.so"],
-    strip: { none: true },
-    recovery_available: true,
-    check_elf_files: false,
+    srcs: ["prebuilt/a15-aidl/src/system/keymaster/ng/KeyMintUtils.cpp"],
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wunused",
+        "-Wno-error=unused-const-variable",
+        "-Wno-error=unused-private-field",
+        "-Wimplicit-fallthrough",
+        "-fno-sanitize-coverage=edge,indirect-calls,8bit-counters,trace-cmp",
+    ],
+    local_include_dirs: [
+        "prebuilt/a15-aidl/include/keymaster-ng",
+        "prebuilt/a15-aidl/include/keymaster",
+    ],
     export_include_dirs: [
         "prebuilt/a15-aidl/include/keymaster-ng",
         "prebuilt/a15-aidl/include/keymaster",
     ],
+    shared_libs: [
+        "android.hardware.security.keymint-V3-ndk-twrp-a15",
+        "libbase",
+        "libhardware",
+    ],
+    recovery_available: true,
 }
 
-cc_prebuilt_library_shared {
+cc_library_shared {
     name: "libkeymint_support-twrp-a15",
-    srcs: ["prebuilt/a15-aidl/lib64/libkeymint_support.so"],
-    strip: { none: true },
-    recovery_available: true,
-    check_elf_files: false,
+    srcs: [
+        "prebuilt/a15-aidl/src/hardware/interfaces/security/keymint/support/attestation_record.cpp",
+        "prebuilt/a15-aidl/src/hardware/interfaces/security/keymint/support/authorization_set.cpp",
+        "prebuilt/a15-aidl/src/hardware/interfaces/security/keymint/support/keymint_utils.cpp",
+        "prebuilt/a15-aidl/src/hardware/interfaces/security/keymint/support/key_param_output.cpp",
+    ],
+    cflags: [
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+    ],
+    local_include_dirs: ["prebuilt/a15-aidl/include/keymint-support"],
     export_include_dirs: ["prebuilt/a15-aidl/include/keymint-support"],
+    header_libs: ["libhardware_headers"],
+    shared_libs: [
+        "android.hardware.security.keymint-V3-ndk-twrp-a15",
+        "libbase",
+        "libcrypto",
+        "libhardware",
+        "libutils",
+    ],
+    recovery_available: true,
 }

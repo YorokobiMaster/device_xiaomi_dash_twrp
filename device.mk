@@ -16,9 +16,14 @@ PRODUCT_PROPERTY_OVERRIDES += \
     ro.twrp.vendor_boot=true
 
 PRODUCT_PACKAGES += \
+    android.hardware.gatekeeper-V1-ndk-twrp-a15.recovery \
+    android.hardware.security.keymint-V3-ndk-twrp-a15.recovery \
+    android.hardware.security.secureclock-V1-ndk-twrp-a15-build.recovery \
     dash.recovery.logd.rc \
     init.recovery.mt6991.rc \
     init.recovery.project.rc \
+    lib_android_keymaster_keymint_utils-twrp-a15.recovery \
+    libkeymint_support-twrp-a15.recovery \
     task_profiles.json
 
 # Remove optional utilities inherited by TWRP common.mk for the size-gated first build.

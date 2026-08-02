@@ -9,6 +9,17 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 ARTIFACTS = ROOT / "evidence" / "artifacts.json"
 PREBUILT_HASHES = ROOT / "evidence" / "a15-prebuilts.sha256"
+DASH_LOGICAL_PARTITIONS = {
+    "mi_ext",
+    "odm",
+    "odm_dlkm",
+    "product",
+    "system",
+    "system_dlkm",
+    "system_ext",
+    "vendor",
+    "vendor_dlkm",
+}
 
 
 def sha256(path: Path) -> str:
@@ -26,7 +37,7 @@ def result(name: str, passed: bool, detail: str) -> dict:
 def main() -> int:
     checks = []
     manifest = json.loads(ARTIFACTS.read_text(encoding="utf-8"))
-    for artifact in manifest["artifacts"]:
+    for artifact in manifest["local_inputs"]:
         path = ROOT / artifact["destination"]
         exists = path.is_file()
         checks.append(result(f"exists:{artifact['destination']}", exists, str(path)))
@@ -91,10 +102,17 @@ def main() -> int:
 
     extract_script = (ROOT / "extract-files.sh").read_text(encoding="utf-8")
     checks.append(result(
-        "extract:stock-fstab-is-evidence-only",
-        '"$DEVICE_ROOT/evidence/stock-recovery.fstab"' in extract_script
+        "extract:dtb-is-local-input",
+        '"$DEVICE_ROOT/local-inputs/dash-stock.dtb"' in extract_script
+        and '"$DEVICE_ROOT/prebuilt/dash-stock.dtb"' not in extract_script,
+        "the verified stock DTB must be written only to the ignored local-input directory",
+    ))
+    checks.append(result(
+        "extract:stock-configs-not-copied",
+        "stock-recovery.fstab" not in extract_script
+        and "stock/trees/recovery/init.recovery.mt6991.rc" not in extract_script
         and '"$DEVICE_ROOT/recovery.fstab"' not in extract_script,
-        "stock extraction must not overwrite the recovery-specific fstab",
+        "stock configuration files must not be copied into the source tree",
     ))
 
     board = (ROOT / "BoardConfig.mk").read_text(encoding="utf-8")
@@ -218,23 +236,14 @@ def main() -> int:
             f"rows={matching}",
         ))
 
-    stock_fstab = (ROOT / "evidence" / "stock-recovery.fstab").read_text(encoding="utf-8")
-    stock_rows = [
-        line.split() for line in stock_fstab.splitlines()
-        if line.strip() and not line.lstrip().startswith("#")
-    ]
-    stock_logical = {
-        row[0] for row in stock_rows
-        if len(row) == 5 and "logical" in row[4].split(",")
-    }
     actual_logical = {
         row[0] for row in rows
         if len(row) == 5 and "logical" in row[4].split(",")
     }
     checks.append(result(
-        "fstab:logical-set-matches-stock",
-        actual_logical == stock_logical,
-        f"expected={sorted(stock_logical)} actual={sorted(actual_logical)}",
+        "fstab:logical-set-matches-device-baseline",
+        actual_logical == DASH_LOGICAL_PARTITIONS,
+        f"expected={sorted(DASH_LOGICAL_PARTITIONS)} actual={sorted(actual_logical)}",
     ))
 
     forbidden_fstab = [" avb", "overlay ", "by-name/lk"]
@@ -242,9 +251,9 @@ def main() -> int:
         checks.append(result(f"fstab:forbidden:{token}", token not in fstab, token))
 
     usb_rc = (ROOT / "rootdir" / "init.recovery.mt6991.rc").read_text(encoding="utf-8")
-    checks.append(result("usb:configfs", "setprop sys.usb.configfs 1" in usb_rc, "stock configfs property"))
-    checks.append(result("usb:controller", "16701000.usb0" in usb_rc, "stock MT6991 controller"))
     project_rc = (ROOT / "rootdir" / "init.recovery.project.rc").read_text(encoding="utf-8")
+    checks.append(result("usb:configfs", "setprop sys.usb.configfs 1" in project_rc, "configfs property"))
+    checks.append(result("usb:controller", "16701000.usb0" in project_rc, "observed MT6991 controller"))
     checks.append(result(
         "storage:direct-path",
         "export EXTERNAL_STORAGE /data/media/0" in project_rc
@@ -272,11 +281,28 @@ def main() -> int:
         "insmod /lib/modules/nt38771_touch_dash.ko",
         "wait /dev/xiaomi-touch 10",
         "start dash-touch-bridge",
+        "service tee-supplicant /vendor/bin/tee-supplicant",
+        "service vendor.keymint-mitee /vendor/bin/hw/android.hardware.security.keymint@3.0-service.mitee",
+        "service vendor.gatekeeper_mitee /vendor/bin/hw/android.hardware.gatekeeper-service.mitee",
+        "on property:fstab.additional=1",
+        "start tee-supplicant",
+        "on property:init.svc.tee-ready-delay=stopped",
+        "start vendor.keymint-mitee",
+        "start vendor.gatekeeper_mitee",
     ]
     checks.append(result(
         "project-init:imported",
         "import /init.recovery.project.rc" in usb_rc,
-        "stock MT6991 init imports the project hook",
+        "MT6991 init imports the project hook",
+    ))
+    direct_vendor_mounts = (
+        "/dev/block/mapper/vendor_a /vendor",
+        "/dev/block/mapper/vendor_b /vendor",
+    )
+    checks.append(result(
+        "project-init:vendor-mount-is-slot-neutral",
+        all(token not in project_rc for token in direct_vendor_mounts),
+        "recovery.fstab slotselect must own the /vendor mount",
     ))
     for token in project_required:
         checks.append(result(
@@ -284,9 +310,12 @@ def main() -> int:
             token in project_rc,
             token,
         ))
+    bridge_block = project_rc.split(
+        "service dash-touch-bridge /system/bin/touch_report_debug", 1
+    )[1].split("# Load the device-exact", 1)[0]
     checks.append(result(
         "project-init:bridge-is-retryable",
-        "    oneshot\n" not in project_rc
+        "    oneshot\n" not in bridge_block
         and "on boot\n    wait /dev/xiaomi-touch 10" in project_rc,
         "bridge must wait for its device node and remain restartable",
     ))

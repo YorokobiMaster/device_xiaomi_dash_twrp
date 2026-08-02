@@ -2,7 +2,8 @@
 set -euo pipefail
 
 DEVICE_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-WORKSPACE_ROOT="$(realpath "$DEVICE_ROOT/../../..")"
+PROJECT_ROOT="$(realpath "$DEVICE_ROOT/../../../..")"
+STOCK_ROOT="${DASH_STOCK_ROOT:-$PROJECT_ROOT/stock}"
 
 copy_verified() {
     local source_path="$1"
@@ -22,14 +23,6 @@ copy_verified() {
 }
 
 copy_verified \
-    "$WORKSPACE_ROOT/stock/vendor_boot/aosp_unpack/dtb" \
+    "$STOCK_ROOT/vendor_boot/aosp_unpack/dtb" \
     2636d5a861e909f5bf32fb3b5c80b25824fbb6591e31a21b6b1326b6dc52d7e3 \
-    "$DEVICE_ROOT/prebuilt/dash-stock.dtb"
-copy_verified \
-    "$WORKSPACE_ROOT/stock/trees/recovery/system/etc/recovery.fstab" \
-    dcd57d2fbab10b683ddecea92ae3a54a69ac161af7ef1b90d07190335931b565 \
-    "$DEVICE_ROOT/evidence/stock-recovery.fstab"
-copy_verified \
-    "$WORKSPACE_ROOT/stock/trees/recovery/init.recovery.mt6991.rc" \
-    ba8eddd72cbaad183012da73c1ebd1d2abbacb0ff1ed4eaad5dd0b4ec395371e \
-    "$DEVICE_ROOT/rootdir/init.recovery.mt6991.rc"
+    "$DEVICE_ROOT/local-inputs/dash-stock.dtb"

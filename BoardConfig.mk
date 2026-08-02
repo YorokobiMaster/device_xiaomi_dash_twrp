@@ -27,7 +27,11 @@ BOARD_KERNEL_PAGESIZE := 4096
 BOARD_KERNEL_CMDLINE := bootopt=64S3,32N2,64N2
 BOARD_RAMDISK_USE_LZ4 := true
 BOARD_INCLUDE_DTB_IN_BOOTIMG := true
-BOARD_PREBUILT_DTBIMAGE_DIR := $(DEVICE_PATH)/prebuilt
+DASH_STOCK_DTB := $(DEVICE_PATH)/local-inputs/dash-stock.dtb
+ifeq ($(wildcard $(DASH_STOCK_DTB)),)
+$(error Missing local stock DTB at $(DASH_STOCK_DTB); run $(DEVICE_PATH)/extract-files.sh first)
+endif
+BOARD_PREBUILT_DTBIMAGE_DIR := $(DEVICE_PATH)/local-inputs
 
 BOARD_MKBOOTIMG_ARGS += --header_version 4
 BOARD_MKBOOTIMG_ARGS += --kernel_offset 0x80000000

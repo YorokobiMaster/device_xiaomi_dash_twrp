@@ -1,5 +1,6 @@
 # ---- Stock firmware inputs (never commit: Xiaomi copyrighted binaries) ----
 repack/inputs/
+local-inputs/
 *.img
 *.img.bak
 
