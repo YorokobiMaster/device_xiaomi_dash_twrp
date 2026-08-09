@@ -29,7 +29,7 @@ BOARD_RAMDISK_USE_LZ4 := true
 BOARD_INCLUDE_DTB_IN_BOOTIMG := true
 DASH_STOCK_DTB := $(DEVICE_PATH)/local-inputs/dash-stock.dtb
 ifeq ($(wildcard $(DASH_STOCK_DTB)),)
-$(error Missing local stock DTB at $(DASH_STOCK_DTB); run $(DEVICE_PATH)/extract-files.sh first)
+$(error Missing local stock DTB at $(DASH_STOCK_DTB); run $(DEVICE_PATH)/extract_dtb.sh first)
 endif
 BOARD_PREBUILT_DTBIMAGE_DIR := $(DEVICE_PATH)/local-inputs
 

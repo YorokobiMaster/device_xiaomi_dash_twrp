@@ -11,7 +11,7 @@ licensed under Apache-2.0. The complete license text is in
 
 | Local material | Upstream project | Pinned source |
 |---|---|---|
-| Frozen Gatekeeper V1, KeyMint V3, and SecureClock V1 AIDL-generated build inputs | `platform/hardware/interfaces` | A15 source `android-15.0.0_r1` / `488942f82bd1bc9ad1cb65a02c71421dc3a6a3d6`; generation uses the manifest-pinned A16 checkout recorded in `prebuilt/a15-aidl/SOURCE_LOCK.json` |
+| Frozen Gatekeeper V1, KeyMint V3, and SecureClock V1 AIDL-generated build inputs | `platform/hardware/interfaces` | A15 source `android-15.0.0_r1` / `488942f82bd1bc9ad1cb65a02c71421dc3a6a3d6` |
 | `prebuilt/a15-aidl/include/keymaster-ng/` and `prebuilt/a15-aidl/include/keymaster/` | `platform/system/keymaster` | `android-15.0.0_r1` / `8fecfe9ee2e46c3b7017be66cbdb4f080266e1c4` |
 | `prebuilt/a15-aidl/include/keymint-support/` | `platform/hardware/interfaces` | `android-15.0.0_r1` / `488942f82bd1bc9ad1cb65a02c71421dc3a6a3d6` |
 | `prebuilt/a15-aidl/src/` | `platform/system/keymaster` and `platform/hardware/interfaces` | same A15 revisions above |
@@ -34,9 +34,4 @@ documentation. See `COPYING`.
 The AOSP notice above does not grant rights to the Xiaomi/MediaTek stock DTB.
 That DTB is not tracked by this repository: a local build must extract its own
 hash-verified copy into the ignored `local-inputs/` directory. The stock fstab
-and init files used during bring-up are also not distributed:
-`evidence/artifacts.json` retains only their hashes, sizes, and the purposes of
-the hardware facts observed from them. The files in
-`prebuilt/a15-aidl/abi/` similarly contain symbol-name compatibility facts
-extracted from the previously validated stock recovery ELFs; they contain no
-executable code and are not attributed to AOSP.
+and init files used during bring-up are also not distributed.

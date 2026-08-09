@@ -4,9 +4,8 @@ package {
 
 // dash ships an Android 15 vendor with KeyMint V3. AOSP 16's normal
 // Gatekeeper V1 target follows the latest KeyMint V4 interface, so generate the
-// frozen AIDL sources with the pinned platform toolchain and link them narrowly
-// against V3. SOURCE_LOCK.json records both the frozen A15 source revision and
-// the A16 generator revision. No Xiaomi recovery ELF is used by these modules.
+// frozen AIDL sources and link them narrowly against V3. No Xiaomi recovery ELF
+// is used by these modules.
 cc_library_static {
     name: "libbinder_ndk_api35_transaction_names_compat",
     srcs: ["prebuilt/a15-aidl/src/binder_ndk_api35_transaction_names_compat.cpp"],
