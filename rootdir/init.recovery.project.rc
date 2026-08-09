@@ -1,6 +1,9 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Dash recovery services and device-observed boot, crypto, USB, and input behavior.
 
+on init
+    setprop twrp.crypto.runtime.released 0
+
 service tee-supplicant /vendor/bin/tee-supplicant
     class core
     user system
@@ -48,7 +51,6 @@ service vendor.secure_element_hal_service /vendor/bin/hw/vendor.xiaomi.hardware.
     setenv LD_LIBRARY_PATH /system/lib64/stock-vendor-hal:/vendor/lib64:/odm/lib64:/system/lib64
     disabled
     oneshot
-    interface aidl android.hardware.secure_element.ISecureElement/eSE1
 
 # Manual-only AuthSecret dependency for the recovery Weaver registration probe.
 # Keep this disabled and oneshot: recovery must never start it automatically.
@@ -59,10 +61,8 @@ service miweaver_hal_service /odm/bin/hw/vendor.xiaomi.hardware.authsecretd
     setenv LD_LIBRARY_PATH /odm/lib64:/vendor/lib64:/system/lib64
     disabled
     oneshot
-    interface aidl vendor.xiaomi.hardware.miauthsecretd.IMIAuthSecret/default
-    interface aidl vendor.xiaomi.hardware.miauthsecretd.ICpaceService/default
 
-on property:fstab.additional=1
+on property:fstab.additional=1 && property:twrp.crypto.runtime.released=0
     # recovery.fstab has already mounted the active-slot vendor at /vendor.
     mkdir /mnt/vendor/persist 0755 root root
     mount ext4 /dev/block/by-name/persist /mnt/vendor/persist noatime nosuid nodev noauto_da_alloc nodelalloc commit=1
@@ -78,7 +78,7 @@ on property:fstab.additional=1
     start tee-supplicant
     start tee-ready-delay
 
-on property:init.svc.tee-ready-delay=stopped
+on property:init.svc.tee-ready-delay=stopped && property:twrp.crypto.runtime.released=0
     start vendor.keymint-mitee
     start vendor.gatekeeper_mitee
     # Safety gate: Weaver is started manually after the GUI is available so

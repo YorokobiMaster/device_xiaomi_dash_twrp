@@ -74,6 +74,7 @@ TW_INCLUDE_FASTBOOTD := true
 TW_NO_REBOOT_FASTBOOT := true
 TW_EXCLUDE_APEX := true
 TW_INCLUDE_CRYPTO := true
+TW_INCLUDE_OMAPI := true
 TW_EXCLUDE_TZDATA := true
 TW_EXCLUDE_NANO := true
 TW_EXCLUDE_BASH := true
@@ -92,6 +93,7 @@ TW_SHOW_LEGACY_ADVANCED := false
 TW_KEEP_VENDOR_MOUNTED := true
 # The stock Weaver binary links its Xiaomi AuthSecret AIDL interface from ODM.
 TW_KEEP_ODM_MOUNTED := true
+TW_DASH_RELEASE_CRYPTO_MOUNTS_AFTER_DECRYPT := true
 # TWRP maps metadata-encrypted userdata before user authentication. Tear that
 # mapping down through TWRP's native dmctl path before formatting the raw block.
 TW_USE_DMCTL := true
