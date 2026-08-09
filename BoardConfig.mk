@@ -13,6 +13,7 @@ TARGET_BOOTLOADER_BOARD_NAME := mt6991
 TARGET_BOARD_PLATFORM := mt6991
 TARGET_NO_BOOTLOADER := true
 TARGET_NO_KERNEL := true
+TARGET_COPY_OUT_VENDOR := vendor
 
 # The pinned recovery manifest intentionally omits test and host-tool dependency
 # closures. Soong still parses their remaining Android.bp files; selected
@@ -27,9 +28,9 @@ BOARD_KERNEL_PAGESIZE := 4096
 BOARD_KERNEL_CMDLINE := bootopt=64S3,32N2,64N2
 BOARD_RAMDISK_USE_LZ4 := true
 BOARD_INCLUDE_DTB_IN_BOOTIMG := true
-DASH_STOCK_DTB := $(DEVICE_PATH)/local-inputs/dash-stock.dtb
+DASH_STOCK_DTB := $(DEVICE_PATH)/local-inputs/dtb
 ifeq ($(wildcard $(DASH_STOCK_DTB)),)
-$(error Missing local stock DTB at $(DASH_STOCK_DTB); run $(DEVICE_PATH)/extract_dtb.sh first)
+$(error Missing local stock DTB at $(DASH_STOCK_DTB); unpack stock vendor_boot.img into $(DEVICE_PATH)/local-inputs first)
 endif
 BOARD_PREBUILT_DTBIMAGE_DIR := $(DEVICE_PATH)/local-inputs
 

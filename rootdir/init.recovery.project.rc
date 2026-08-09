@@ -69,6 +69,10 @@ on property:fstab.additional=1 && property:twrp.crypto.runtime.released=0
     restorecon_recursive /mnt/vendor/persist
     mkdir /mnt/vendor/persist/data 0755 system system
     mkdir /mnt/vendor/persist/fdsd 0755 system system
+    chmod 0660 /dev/tee0
+    chown system system /dev/tee0
+    chmod 0660 /dev/teepriv0
+    chown system system /dev/teepriv0
     chmod 0660 /dev/rpmb0
     chown system system /dev/rpmb0
     chmod 0660 /dev/0:0:0:49476
@@ -141,11 +145,13 @@ service dash-touch-bridge /system/bin/touch_report_debug
     # This is a long-running daemon. If it exits during early touch setup,
     # let init retry it (default 5s period) instead of leaving the screen
     # permanently inert.
-    setenv LD_LIBRARY_PATH /odm/lib64:/system/lib64
+    setenv LD_LIBRARY_PATH /ram/lib64:/system/lib64
 
-# Load the device-exact vendor_dlkm touchscreen and haptics modules after
+# Load the device-exact credential, touchscreen, and haptics modules after
 # platform modules.
 on init
+    insmod /lib/modules/nxp_i2c.ko
+    insmod /lib/modules/p73.ko
     insmod /lib/modules/xiaomi_touch_dash.ko
     insmod /lib/modules/nt38771_touch_dash.ko
     insmod /lib/modules/fs3002_haptic.ko
