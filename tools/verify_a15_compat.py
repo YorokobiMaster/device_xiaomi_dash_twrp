@@ -16,8 +16,6 @@ LOCK_PATH = DEVICE_ROOT / "prebuilt/a15-aidl/SOURCE_LOCK.json"
 PROJECT_PATHS = {
     "platform/hardware/interfaces": "hardware/interfaces",
     "platform/system/tools/aidl": "system/tools/aidl",
-    "platform/build/soong": "build/soong",
-    "platform/build": "build/make",
     "platform/prebuilts/clang/host/linux-x86": "prebuilts/clang/host/linux-x86",
     "platform/frameworks/native": "frameworks/native",
 }

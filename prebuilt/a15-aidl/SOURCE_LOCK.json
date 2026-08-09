@@ -24,8 +24,6 @@
   "build_toolchain": {
     "platform/hardware/interfaces": "185265a4c2dccc7f6770ea08eddd36a15b2035b6",
     "platform/system/tools/aidl": "5bde6fcffe8e3ac6feca449f7bc3502eed5fc0f5",
-    "platform/build/soong": "caeeba2d1675ecd6bc1d0d737632b453fb7d93cf",
-    "platform/build": "6dc792b3b14f35cc05d51468758fc0c14bc0d425",
     "platform/prebuilts/clang/host/linux-x86": "2d4dcbff7cb42f360f368bacf51cfe711fd1cb0f",
     "platform/frameworks/native": "2827a4a16b0340ecd07c2d5a6c89991799b362bb"
   },

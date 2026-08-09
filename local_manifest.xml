@@ -3,13 +3,15 @@
   <remote name="yorokobi"
           fetch="https://github.com/YorokobiMaster/" />
 
-  <!-- Replace the four upstream projects that carry dash-specific changes. -->
+  <!-- Replace the upstream projects that carry dash-specific changes. -->
   <remove-project name="android_bootable_recovery" />
+  <remove-project name="android_se_omapi" />
   <remove-project name="android_system_core" />
   <remove-project name="android_system_vold" />
   <remove-project name="android_vendor_twrp" />
 
   <project path="bootable/recovery" name="android_bootable_recovery" remote="yorokobi" revision="twrp-16.0" />
+  <project path="external/se_omapi" name="android_se_omapi" remote="yorokobi" revision="twrp-16.0" />
   <project path="system/core" name="android_system_core" remote="yorokobi" revision="twrp-16.0" />
   <project path="system/vold" name="android_system_vold" remote="yorokobi" revision="twrp-16.0" />
   <project path="vendor/twrp" name="android_vendor_twrp" remote="yorokobi" revision="twrp-16.0" />
