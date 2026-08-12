@@ -17,5 +17,5 @@
   <project path="vendor/twrp" name="android_vendor_twrp" remote="yorokobi" revision="twrp-16.0" />
 
   <project path="device/xiaomi/dash" name="device_xiaomi_dash_twrp" remote="yorokobi" revision="twrp-16.0" />
-  <project path="repack" name="dash_vendor_boot_repack" remote="yorokobi" revision="main" />
+  <project path="repack" name="dash_twrp_repack" remote="yorokobi" revision="main" />
 </manifest>
