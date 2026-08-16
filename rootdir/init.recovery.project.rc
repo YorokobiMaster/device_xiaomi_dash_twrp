@@ -1,6 +1,19 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Dash recovery services and device-observed boot, crypto, USB, and input behavior.
 
+# Persist second-stage recovery progress in ramoops; the next LK archives it to blackbox.
+on early-init
+    write /dev/kmsg "<6>dash-recovery: stage=early-init"
+
+on init
+    write /dev/kmsg "<6>dash-recovery: stage=init"
+
+on post-fs
+    write /dev/kmsg "<6>dash-recovery: stage=post-fs"
+
+on boot
+    write /dev/kmsg "<6>dash-recovery: stage=boot"
+
 on init
     setprop twrp.crypto.runtime.released 0
 
