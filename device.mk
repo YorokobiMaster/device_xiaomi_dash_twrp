@@ -25,7 +25,8 @@ PRODUCT_PACKAGES += \
     init.recovery.project.rc \
     lib_android_keymaster_keymint_utils-twrp-a15.recovery \
     libkeymint_support-twrp-a15.recovery \
-    task_profiles.json
+    task_profiles.json \
+    ueventd.dash.recovery.rc
 
 # Remove optional utilities inherited by TWRP common.mk for the size-gated first build.
 PRODUCT_PACKAGES -= \

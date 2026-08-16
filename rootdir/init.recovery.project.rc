@@ -165,6 +165,8 @@ service dash-touch-bridge /system/bin/touch_report_debug
 on init
     insmod /lib/modules/nxp_i2c.ko
     insmod /lib/modules/p73.ko
+    # The repacked touch firmware lives in the recovery-owned /ram tree.
+    write /sys/module/firmware_class/parameters/path /ram/firmware,/vendor/firmware,/odm/firmware
     insmod /lib/modules/xiaomi_touch_dash.ko
     insmod /lib/modules/nt38771_touch_dash.ko
     insmod /lib/modules/fs3002_haptic.ko
@@ -175,6 +177,4 @@ on init
 # keeps recovering until the node appears.
 on boot
     wait /dev/xiaomi-touch 10
-    chown root input /dev/xiaomi-touch
-    chmod 0660 /dev/xiaomi-touch
     start dash-touch-bridge

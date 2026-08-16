@@ -70,9 +70,7 @@ RECOVERY_SDCARD_ON_DATA := true
 TW_INTERNAL_STORAGE_MOUNT_POINT := "/data/media/0"
 TW_EXCLUDE_DEFAULT_USB_INIT := true
 TW_INCLUDE_FASTBOOTD := true
-# fastbootd cannot run on dash's USB setup; only bootloader fastboot works.
-# Hide the Fastboot reboot entry (the binary stays for the settings toggle).
-TW_NO_REBOOT_FASTBOOT := true
+# Device test: TWRP fastbootd enumerates on 16701000.usb0 as userspace fastboot.
 TW_EXCLUDE_APEX := true
 TW_INCLUDE_CRYPTO := true
 TW_INCLUDE_OMAPI := true
