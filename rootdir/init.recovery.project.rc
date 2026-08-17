@@ -76,10 +76,12 @@ service miweaver_hal_service /odm/bin/hw/vendor.xiaomi.hardware.authsecretd
     oneshot
 
 on property:fstab.additional=1 && property:twrp.crypto.runtime.released=0
-    # recovery.fstab has already mounted the active-slot vendor at /vendor.
+    # Keep one ext4 superblock mount: TWRP owns /persist and vendor services use a bind view.
+    mkdir /persist 0755 root root
+    mount ext4 /dev/block/by-name/persist /persist noatime nosuid nodev noauto_da_alloc nodelalloc commit=1
+    restorecon_recursive /persist
     mkdir /mnt/vendor/persist 0755 root root
-    mount ext4 /dev/block/by-name/persist /mnt/vendor/persist noatime nosuid nodev noauto_da_alloc nodelalloc commit=1
-    restorecon_recursive /mnt/vendor/persist
+    mount none /persist /mnt/vendor/persist bind
     mkdir /mnt/vendor/persist/data 0755 system system
     mkdir /mnt/vendor/persist/fdsd 0755 system system
     chmod 0660 /dev/tee0
